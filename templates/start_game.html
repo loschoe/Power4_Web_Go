@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Puissance 4</title>
+    <link rel="stylesheet" href="../static/styles.css" class="css">
+</head>
+
+<body>
+    <h1>Puissance 4</h1>
+
+    <form method="POST" action="/play">
+        <!-- Boutons pour chaque colonne -->
+        <div class="btn-container">
+            {{range $j := .Cols}}
+            <button class= "btnj" type="submit" name="col" value="{{$j}}">↓</button>
+            {{end}}
+        </div>
+
+        <!-- Grille du jeu -->
+        <table class="board">
+            {{range $i, $row := .Grid}}
+            <tr>
+                {{range $j, $cell := $row}}
+                <td class="cell {{if eq $cell 1}}player1{{else if eq $cell 2}}player2{{end}}">
+                    <div class="hole"></div>
+                </td>
+                {{end}}
+            </tr>
+            {{end}}
+        </table>
+    </form>
+</body>
+</html>
+

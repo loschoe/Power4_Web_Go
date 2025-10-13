@@ -1,25 +1,23 @@
 package main
 
 import (
-	"html/template"			// Relier le go à l'HTML
-	"log"					// Surveiller les bugs 
-	"net/http"				// Le lien avec le web 
-	"path/filepath"			
-	"strconv"				// Conversions de types 
+	"html/template"
+	"log"
+	"net/http"
+	"path/filepath"
+	"strconv"
 )
 
 // --- VARIABLES GLOBALES ---
-// Le tableau avec chaque colonne du puissance 4 initialisé : 
+
 var columns = map[int][]int{
 	0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {},
 }
 
-// currentPlayer est soit le joueur 1 soit le joueur 2 
 var currentPlayer = 1
 
-// --- FONCTIONS UTILES AU FONCTIONNEMENT ---
+// --- FONCTIONS UTILES ---
 
-// resetGame réinitialise le plateau 
 func resetGame() {
 	columns = map[int][]int{
 		0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {},
@@ -27,8 +25,6 @@ func resetGame() {
 	currentPlayer = 1
 }
 
-// detectWinner renvoie 1 ou 2 si un joueur a aligné 4 jetons, sinon 0
-// Tocken c'est les jetons 
 func detectWinner(grid [6][7]int) int {
 	for row := 0; row < 6; row++ {
 		for col := 0; col < 7; col++ {
@@ -75,10 +71,8 @@ func detectWinner(grid [6][7]int) int {
 
 // --- HANDLERS ---
 
-// Page d'accueil du jeu 
 func handleGame(w http.ResponseWriter, r *http.Request) {
-	tmplPath := filepath.Join("templates", "game.html")
-	tmpl, err := template.ParseFiles(tmplPath)
+	tmpl, err := template.ParseFiles(filepath.Join("templates", "game.html"))
 	if err != nil {
 		http.Error(w, "Impossible de charger la page", http.StatusInternalServerError)
 		return
@@ -86,7 +80,6 @@ func handleGame(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
-// Page de victoire joueur 1
 func handleWinner1(w http.ResponseWriter, r *http.Request) {
 	resetGame()
 	tmpl, err := template.ParseFiles(filepath.Join("templates", "winner1.html"))
@@ -97,7 +90,6 @@ func handleWinner1(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
-// Page de victoire joueur 2
 func handleWinner2(w http.ResponseWriter, r *http.Request) {
 	resetGame()
 	tmpl, err := template.ParseFiles(filepath.Join("templates", "winner2.html"))
@@ -108,23 +100,24 @@ func handleWinner2(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
-// Page principale du jeu
 func handlePlay(w http.ResponseWriter, r *http.Request) {
-	resetGame()
+	// Reset automatique au début du jeu
+	if r.Method == http.MethodGet {
+		resetGame()
+	}
+
 	if r.Method == http.MethodPost {
 		r.ParseForm()
 		colStr := r.FormValue("col")
 		c, err := strconv.Atoi(colStr)
 		if err == nil && c >= 0 && c <= 6 {
-			// Vérifie que la colonne n’est pas pleine
 			if len(columns[c]) < 6 {
 				columns[c] = append(columns[c], currentPlayer)
-				currentPlayer = 3 - currentPlayer // alterner 1 <-> 2
+				currentPlayer = 3 - currentPlayer
 			}
 		}
 	}
 
-	// Reconstruire après un tour 
 	var grid [6][7]int
 	for c := 0; c < 7; c++ {
 		for i, val := range columns[c] {
@@ -132,7 +125,6 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Vérification du gagnant
 	winner := detectWinner(grid)
 	if winner == 1 {
 		http.Redirect(w, r, "/winner1", http.StatusSeeOther)
@@ -142,7 +134,6 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Données envoyées au template pour le mettre à jour
 	data := struct {
 		Grid [6][7]int
 		Cols []int
@@ -151,9 +142,7 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 		Cols: []int{0, 1, 2, 3, 4, 5, 6},
 	}
 
-	// Afficher la page du jeu
-	tmplPath := filepath.Join("templates", "start_game.html")
-	tmpl, err := template.ParseFiles(tmplPath)
+	tmpl, err := template.ParseFiles(filepath.Join("templates", "start_game.html"))
 	if err != nil {
 		http.Error(w, "Impossible de charger la page", http.StatusInternalServerError)
 		return
@@ -164,7 +153,6 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 // --- MAIN ---
 
 func main() {
-	// Servir les fichiers statiques (CSS, images, etc.)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 

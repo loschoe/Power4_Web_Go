@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personnalisation</title>
+    <link rel="stylesheet" href="static/init_game.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="big-title">⚙️ Paramètres de jeu ⚙️</h1>
+         <form action="/start" method="POST">
+            <input type="text" placeholder="Pseudo Joueur 1" name="j1" class="input" required value="{{.Joueur1}}">
+            <input type="text" placeholder="Pseudo Joueur 2" name="j2" class="input input2" required value="{{.Joueur2}}">
+            
+            <h3>Choisissez votre difficulté</h3>
+            [Pas encore codé]
+        </form>
+        <form action="/play" method="GET">
+            <button type="submit" class="btn">▶️ Commencer la partie</button>
+        </form>
+        </div>
+    </div>
+</body>
+</html>

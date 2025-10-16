@@ -9,15 +9,23 @@ import (
 )
 
 // --- VARIABLES GLOBALES ---
-
 var columns = map[int][]int{
 	0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {},
 }
-
 var currentPlayer = 1
+var joueur1Name string
+var joueur2Name string
+
+// --- STRUCTURES ---
+type GameData struct {
+	Grid          [6][7]int
+	Cols          []int
+	J1            string
+	J2            string
+	CurrentPlayer int
+}
 
 // --- FONCTIONS UTILES ---
-
 func resetGame() {
 	columns = map[int][]int{
 		0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {},
@@ -70,38 +78,44 @@ func detectWinner(grid [6][7]int) int {
 }
 
 // --- HANDLERS ---
-
-func handleGame(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles(filepath.Join("templates", "game.html"))
+func handleInit(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(filepath.Join("templates", "init_game.html"))
 	if err != nil {
-		http.Error(w, "Impossible de charger la page", http.StatusInternalServerError)
+		http.Error(w, "Erreur chargement personnalisation", http.StatusInternalServerError)
 		return
 	}
 	tmpl.Execute(w, nil)
 }
 
-func handleWinner1(w http.ResponseWriter, r *http.Request) {
-	resetGame()
-	tmpl, err := template.ParseFiles(filepath.Join("templates", "winner1.html"))
-	if err != nil {
-		http.Error(w, "Erreur chargement page victoire J1", http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, nil)
-}
+func handleStart(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		j1 := r.FormValue("j1")
+		j2 := r.FormValue("j2")
+		joueur1Name = j1
+		joueur2Name = j2
 
-func handleWinner2(w http.ResponseWriter, r *http.Request) {
-	resetGame()
-	tmpl, err := template.ParseFiles(filepath.Join("templates", "winner2.html"))
-	if err != nil {
-		http.Error(w, "Erreur chargement page victoire J2", http.StatusInternalServerError)
+		resetGame()
+
+		data := GameData{
+			Cols:          []int{0, 1, 2, 3, 4, 5, 6},
+			J1:            joueur1Name,
+			J2:            joueur2Name,
+			CurrentPlayer: currentPlayer,
+		}
+
+		tmpl, err := template.ParseFiles(filepath.Join("templates", "start_game.html"))
+		if err != nil {
+			http.Error(w, "Erreur template start_game", 500)
+			return
+		}
+		tmpl.Execute(w, data)
 		return
 	}
-	tmpl.Execute(w, nil)
+
+	http.Redirect(w, r, "/init", http.StatusSeeOther)
 }
 
 func handlePlay(w http.ResponseWriter, r *http.Request) {
-	// Reset automatique au début du jeu
 	if r.Method == http.MethodGet {
 		resetGame()
 	}
@@ -134,12 +148,12 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := struct {
-		Grid [6][7]int
-		Cols []int
-	}{
-		Grid: grid,
-		Cols: []int{0, 1, 2, 3, 4, 5, 6},
+	data := GameData{
+		Grid:          grid,
+		Cols:          []int{0, 1, 2, 3, 4, 5, 6},
+		J1:            joueur1Name,
+		J2:            joueur2Name,
+		CurrentPlayer: currentPlayer,
 	}
 
 	tmpl, err := template.ParseFiles(filepath.Join("templates", "start_game.html"))
@@ -150,17 +164,47 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-// --- MAIN ---
+func handleWinner1(w http.ResponseWriter, r *http.Request) {
+	resetGame()
+	tmpl, err := template.ParseFiles(filepath.Join("templates", "winner1.html"))
+	if err != nil {
+		http.Error(w, "Erreur chargement page victoire J1", http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, nil)
+}
 
+func handleWinner2(w http.ResponseWriter, r *http.Request) {
+	resetGame()
+	tmpl, err := template.ParseFiles(filepath.Join("templates", "winner2.html"))
+	if err != nil {
+		http.Error(w, "Erreur chargement page victoire J2", http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, nil)
+}
+
+func handleAccueil(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(filepath.Join("templates", "game.html"))
+	if err != nil {
+		http.Error(w, "Erreur chargement accueil", http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, nil)
+}
+
+// --- MAIN ---
 func main() {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	http.HandleFunc("/", handleGame)
-	http.HandleFunc("/play", handlePlay)
+	http.HandleFunc("/", handleAccueil)   // Page d’accueil redirige vers init
+	http.HandleFunc("/init", handleInit)  // Page de personnalisation
+	http.HandleFunc("/start", handleStart) // Après personnalisation
+	http.HandleFunc("/play", handlePlay)  // Jeu
 	http.HandleFunc("/winner1", handleWinner1)
 	http.HandleFunc("/winner2", handleWinner2)
 
-	log.Println("Serveur démarré sur http://localhost:8080")
+	log.Println("✅ Serveur démarré sur http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

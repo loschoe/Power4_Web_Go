@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Puissance 4</title>
-    <link rel="stylesheet" href="/static/game_styles.css">
+    <link rel="stylesheet" href="../static/game_styles.css" class="css">
     <link rel="stylesheet" href="https://cartr.gitlab.io/undertale-fonts/determination-mono.css">
 </head>
 
@@ -12,20 +12,16 @@
         <h1>Puissance 4</h1>
     </header>
     
-    <div class="player {{if eq .CurrentPlayer 1}}red active{{else}}red{{end}}">
-        {{.J1}}
-    </div>
-    <div class="player {{if eq .CurrentPlayer 2}}yellow active{{else}}yellow{{end}}">
-        {{.J2}}
-    </div>
 
     <form method="POST" action="/play">
+        <!-- Boutons pour chaque colonne -->
         <div class="btn-container">
             {{range $j := .Cols}}
-            <button class="btnj" type="submit" name="col" value="{{$j}}">↓</button>
+            <button class= "btnj" type="submit" name="col" value="{{$j}}">↓</button>
             {{end}}
         </div>
 
+        <!-- Grille du jeu -->
         <table class="board">
             {{range $i, $row := .Grid}}
             <tr>

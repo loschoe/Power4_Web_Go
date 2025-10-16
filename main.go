@@ -40,32 +40,24 @@ func detectWinner(grid [6][7]int) int {
 			if token == 0 {
 				continue
 			}
-
-			// 4 horizontaux
 			if col+3 < 7 &&
 				grid[row][col+1] == token &&
 				grid[row][col+2] == token &&
 				grid[row][col+3] == token {
 				return token
 			}
-
-			// 4 verticaux
 			if row+3 < 6 &&
 				grid[row+1][col] == token &&
 				grid[row+2][col] == token &&
 				grid[row+3][col] == token {
 				return token
 			}
-
-			// diagonale ↘
 			if row+3 < 6 && col+3 < 7 &&
 				grid[row+1][col+1] == token &&
 				grid[row+2][col+2] == token &&
 				grid[row+3][col+3] == token {
 				return token
 			}
-
-			// diagonale ↗
 			if row-3 >= 0 && col+3 < 7 &&
 				grid[row-1][col+1] == token &&
 				grid[row-2][col+2] == token &&
@@ -81,7 +73,7 @@ func detectWinner(grid [6][7]int) int {
 func handleInit(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles(filepath.Join("templates", "init_game.html"))
 	if err != nil {
-		http.Error(w, "Erreur chargement personnalisation", http.StatusInternalServerError)
+		http.Error(w, "Erreur chargement personnalisation : "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	tmpl.Execute(w, nil)
@@ -89,11 +81,8 @@ func handleInit(w http.ResponseWriter, r *http.Request) {
 
 func handleStart(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		j1 := r.FormValue("j1")
-		j2 := r.FormValue("j2")
-		joueur1Name = j1
-		joueur2Name = j2
-
+		joueur1Name = r.FormValue("j1")
+		joueur2Name = r.FormValue("j2")
 		resetGame()
 
 		data := GameData{
@@ -105,21 +94,16 @@ func handleStart(w http.ResponseWriter, r *http.Request) {
 
 		tmpl, err := template.ParseFiles(filepath.Join("templates", "start_game.html"))
 		if err != nil {
-			http.Error(w, "Erreur template start_game", 500)
+			http.Error(w, "Erreur template start_game : "+err.Error(), 500)
 			return
 		}
 		tmpl.Execute(w, data)
 		return
 	}
-
 	http.Redirect(w, r, "/init", http.StatusSeeOther)
 }
 
 func handlePlay(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		resetGame()
-	}
-
 	if r.Method == http.MethodPost {
 		r.ParseForm()
 		colStr := r.FormValue("col")
@@ -158,7 +142,7 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles(filepath.Join("templates", "start_game.html"))
 	if err != nil {
-		http.Error(w, "Impossible de charger la page", http.StatusInternalServerError)
+		http.Error(w, "Impossible de charger la page : "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	tmpl.Execute(w, data)
@@ -168,7 +152,7 @@ func handleWinner1(w http.ResponseWriter, r *http.Request) {
 	resetGame()
 	tmpl, err := template.ParseFiles(filepath.Join("templates", "winner1.html"))
 	if err != nil {
-		http.Error(w, "Erreur chargement page victoire J1", http.StatusInternalServerError)
+		http.Error(w, "Erreur chargement page victoire J1 : "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	tmpl.Execute(w, nil)
@@ -178,19 +162,14 @@ func handleWinner2(w http.ResponseWriter, r *http.Request) {
 	resetGame()
 	tmpl, err := template.ParseFiles(filepath.Join("templates", "winner2.html"))
 	if err != nil {
-		http.Error(w, "Erreur chargement page victoire J2", http.StatusInternalServerError)
+		http.Error(w, "Erreur chargement page victoire J2 : "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	tmpl.Execute(w, nil)
 }
 
 func handleAccueil(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles(filepath.Join("templates", "game.html"))
-	if err != nil {
-		http.Error(w, "Erreur chargement accueil", http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, nil)
+	http.Redirect(w, r, "/init", http.StatusSeeOther)
 }
 
 // --- MAIN ---
@@ -198,10 +177,10 @@ func main() {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	http.HandleFunc("/", handleAccueil)   // Page d’accueil redirige vers init
-	http.HandleFunc("/init", handleInit)  // Page de personnalisation
-	http.HandleFunc("/start", handleStart) // Après personnalisation
-	http.HandleFunc("/play", handlePlay)  // Jeu
+	http.HandleFunc("/", handleAccueil)
+	http.HandleFunc("/init", handleInit)
+	http.HandleFunc("/start", handleStart)
+	http.HandleFunc("/play", handlePlay)
 	http.HandleFunc("/winner1", handleWinner1)
 	http.HandleFunc("/winner2", handleWinner2)
 

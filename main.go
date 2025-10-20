@@ -90,6 +90,12 @@ func detectWinner(grid [][]int) int {
 	return 0
 }
 
+// =================== Handlers ===================
+func handleHome(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "game.html")))
+	tmpl.Execute(w, nil)
+}
+
 func handleInit(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "init_game.html")))
 	tmpl.Execute(w, nil)
@@ -216,15 +222,18 @@ func handleWinner(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, struct{ Winner string }{Winner: winner})
 }
 
+// =================== Main ===================
 func main() {
+	// Fichiers statiques
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	http.HandleFunc("/", handleInit)
-	http.HandleFunc("/init", handleInit)
-	http.HandleFunc("/start", handleStart)
-	http.HandleFunc("/play", handlePlay)
-	http.HandleFunc("/winner", handleWinner)
+	// Routes principales
+	http.HandleFunc("/", handleHome)        // Page d'accueil
+	http.HandleFunc("/init", handleInit)    // Formulaire de saisie des noms
+	http.HandleFunc("/start", handleStart)  // Lancement du jeu
+	http.HandleFunc("/play", handlePlay)    // Jouer un coup
+	http.HandleFunc("/winner", handleWinner)// Page gagnant
 
 	log.Println("✅ Serveur démarré sur http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))

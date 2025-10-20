@@ -29,7 +29,7 @@ func init() {
 func initColumns() {
 	columns = make(map[int][]int)
 	for c := 0; c < cols; c++ {
-		columns[c] = make([]int, rows) // toutes les cases à 0
+		columns[c] = make([]int, rows)
 	}
 	currentPlayer = 1
 }
@@ -105,7 +105,6 @@ func handleStart(w http.ResponseWriter, r *http.Request) {
 	j2 := r.FormValue("j2")
 	difficulty := r.FormValue("difficulty")
 
-	// Définir dimensions selon difficulté
 	switch difficulty {
 	case "easy", "medium":
 		rows, cols = 6, 7
@@ -119,7 +118,6 @@ func handleStart(w http.ResponseWriter, r *http.Request) {
 
 	resetGame()
 
-	// Placer les blocs selon difficulté
 	switch difficulty {
 	case "medium":
 		placeBlocks(3)
@@ -145,7 +143,6 @@ func handleStart(w http.ResponseWriter, r *http.Request) {
 		data.Cols[i] = i
 	}
 
-	// Remplir la grille depuis columns
 	for c := 0; c < cols; c++ {
 		for r := 0; r < rows; r++ {
 			data.Grid[rows-1-r][c] = columns[c][r]
@@ -169,7 +166,6 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 
 	c, err := strconv.Atoi(colStr)
 	if err == nil && c >= 0 && c < cols {
-		// Placer le jeton dans la première case libre depuis le bas
 		for r := 0; r < rows; r++ {
 			if columns[c][r] == 0 {
 				columns[c][r] = currentPlayer
@@ -179,7 +175,6 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Construire la grille pour le template
 	grid := make([][]int, rows)
 	for r := 0; r < rows; r++ {
 		grid[r] = make([]int, cols)
@@ -190,7 +185,6 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Vérifier le gagnant
 	winner := detectWinner(grid)
 	if winner == 1 {
 		http.Redirect(w, r, "/winner?name="+j1, http.StatusSeeOther)
@@ -200,7 +194,6 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Préparer les données pour le template
 	data := GameData{
 		Grid:          grid,
 		Cols:          make([]int, cols),

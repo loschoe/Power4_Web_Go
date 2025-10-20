@@ -1,3 +1,4 @@
+/* Page de présentation du jeu */
 :root {
     --bg-deep: #080b12;
     --neon-cyan: #00eaff;
@@ -11,7 +12,7 @@
     --glow-purple: #8b5cf6; /* лилаво */
     --glow-blue:   #00eaff; 
 }
-  /* Фон с неонви отгоре */
+
 body {
     margin: 0;
     height: 100vh;
@@ -105,7 +106,6 @@ body::after{
     pointer-events:none;
 }
 
-
 .title-panel{
   position: relative;
   border-radius: 22px;
@@ -119,6 +119,7 @@ body::after{
     inset 0 0 24px rgba(205,61,164,.08);     /* вътрешен розов */
   isolation: isolate;
   overflow: hidden;
+  padding: clamp(14px, 2.2vmin, 22px) clamp(22px, 3.2vmin, 32px)
 }
 
 .bubble p{margin:0 0 .8em}
@@ -126,51 +127,6 @@ body::after{
 
 .title--pulse{
   animation: neonPulse 2.6s ease-in-out infinite;
-}
-
-
-.grid-wall {
-  position: fixed;
-  left: 0;              
-  right: 0;             
-  top: 0;          
-  height: 58vh;       
-  z-index: 1;   
-  pointer-events: none;
-
-  background:
-    repeating-linear-gradient(
-      to right,
-      var(--neon-cyan) 0 1px,
-      transparent 1px var(--grid)
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      var(--neon-pink) 0 1px,
-      transparent 1px var(--grid)
-    );
-
-  mix-blend-mode: screen;
-  opacity: 0.8;
-  filter:
-    drop-shadow(0 0 6px var(--neon-cyan))
-    drop-shadow(0 0 12px var(--neon-pink))
-    drop-shadow(0 0 20px var(--neon-pink));
-
- -webkit-mask-image: linear-gradient(
-  to bottom,
-  #000 0%,
-  #000 65%,
-  rgba(0,0,0,0.4) 85%,
-  transparent 100%
-);
-        mask-image: linear-gradient(
-  to bottom,
-  #000 0%,
-  #000 65%,
-  rgba(0,0,0,0.4) 85%,
-  transparent 100%
-);
 }
 
 .grid-floor {
@@ -204,7 +160,6 @@ body::after{
     drop-shadow(0 0 16px var(--neon-pink))
     drop-shadow(0 0 26px var(--neon-pink));
 
-  /* плавно избледняване към хоризонта */
   -webkit-mask-image: linear-gradient(
     to top,
     #000 0%,
@@ -277,6 +232,20 @@ body::after{
     inset 0 0 0 2px rgba(0,234,255,.35),
     0 6px 18px rgba(0,234,255,.18);
   transition: transform .14s ease, box-shadow .2s ease, filter .2s ease;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 500;
+  color: #ffffff;
+  width: 100%;
+  padding: 12px 16px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ff4b2b, #ff416c), 0.3s ease;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform 0.2s ease; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .start-btn:hover{
@@ -286,6 +255,8 @@ body::after{
     0 8px 24px rgba(205,61,164,.25),
     0 8px 26px rgba(0,234,255,.28);
   filter: saturate(120%);
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  transform: scale(1.03);
 }
 .start-btn:active{ transform: translateY(0); }
 
@@ -395,4 +366,3 @@ header.neon-panel.title-panel::before{ z-index: 3; }
 /* самият текст да е над вътрешния тинт */
 .big-title{ position: relative; z-index: 2; }
 
-         

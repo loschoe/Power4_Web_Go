@@ -1,10 +1,10 @@
+/* Plateau de jeu */
 .board {
     border-collapse: collapse;
     background-color: #004080;
-    margin-top: 20px;
+    margin: 20px auto 0 auto;
     border-radius: 12px;
     overflow: hidden;
-
 }
 
 .cell {
@@ -23,20 +23,17 @@
 }
 
 .cell.player1 .hole {
-    background-color: red; /* jeton joueur 1 */
+    background-color: red;
 }
 
 .cell.player2 .hole {
-    background-color: yellow; /* jeton joueur 2 */
+    background-color: yellow;
 }
 
-table {
-    margin: 0 auto;
-    border-collapse: collapse;
-    padding: 10px; /* ajoute de l’espace autour */
-    border-radius: 12px; /* arrondir les coins si tu veux */
+.cell.block {
+    background-color: #004080;
+    cursor: not-allowed;
 }
-
 
 td {
     width: 63px;
@@ -46,6 +43,7 @@ td {
     padding: 0;
 }
 
+/* Boutons de colonnes */
 .btn-container {
     display: flex;
     justify-content: center;
@@ -59,7 +57,7 @@ td {
     border: none;
     border-radius: 10px;
     background: linear-gradient(145deg, #b2f2bb, #a8e6cf);
-    color: #004d00;;
+    color: #004d00;
     box-shadow: 3px 3px 6px #aaa, -3px -3px 6px #fff;
     cursor: pointer;
     font-weight: bold;
@@ -77,3 +75,108 @@ td {
     transform: translateY(1px);
     box-shadow: inset 2px 2px 4px #aaa, inset -2px -2px 4px #fff;
 }
+
+/* Définition des animations folles (inchangées) */
+@keyframes neonPulseCrazy {
+    0% { text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink), 0 0 15px var(--neon-pink); transform: scale(1); }
+    50% { text-shadow: 0 0 20px var(--neon-pink), 0 0 30px var(--neon-pink), 0 0 40px var(--neon-pink); transform: scale(1.05); }
+    100% { text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink), 0 0 15px var(--neon-pink); transform: scale(1); }
+}
+
+@keyframes glowShift {
+    0% { filter: drop-shadow(0 0 10px var(--neon-pink)) drop-shadow(0 0 20px var(--neon-pink)); }
+    50% { filter: drop-shadow(0 0 20px var(--neon-pink)) drop-shadow(0 0 30px var(--neon-pink)); }
+    100% { filter: drop-shadow(0 0 10px var(--neon-pink)) drop-shadow(0 0 20px var(--neon-pink)); }
+}
+
+/* Titre principal (inchangé) */
+h1.big-title {
+    font-size: clamp(2.5rem, 6vw + 1rem);
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-pink));  
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;  
+    text-align: center;
+    margin-top: 20px;
+    filter: drop-shadow(0 0 4px var(--neon-pink)) drop-shadow(0 0 10px var(--neon-pink));
+    font-family: system-ui, sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    animation: neonPulseCrazy 3s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+}
+
+/* Infos joueurs - Ajout de flexbox pour empiler verticalement */
+.player-info {
+    text-align: center;
+    margin-bottom: 20px;
+    background: transparent;  
+    backdrop-filter: blur(6px) saturate(120%);  
+    border-radius: 22px;  
+    padding: 1rem;  
+    filter: drop-shadow(0 0 8px var(--neon-pink));  
+    animation: glowShift 5s ease-in-out infinite;
+    transition: transform 0.3s ease;
+    display: flex;  /* Ajout pour flexbox */
+    flex-direction: column;  /* Empile verticalement */
+    align-items: center;  /* Centre les éléments horizontalement */
+}
+
+.player-info:hover {
+    transform: scale(1.02) rotate(1deg);
+}
+
+.player-info p {
+    padding: 10px;
+    background: linear-gradient(90deg, rgba(255,0,225,0.15), rgba(255,0,225,0.15));
+    margin: 10px auto;  /* Ajout de marge pour espacer .aff_joueurs et .aff_tour */
+    width: fit-content;
+    filter: drop-shadow(0 0 6px var(--neon-pink));  
+    color: var(--text);
+    animation: neonPulseCrazy 2.5s ease-in-out infinite;
+    position: relative;
+    border-radius: 12px;
+}
+
+.player-info p::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border: 1px solid transparent;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-pink)) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
+    animation: glowShift 3s ease-in-out infinite;
+}
+
+.player-info .aff_joueurs {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: var(--neon-pink);  
+    text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink);
+    animation: neonPulseCrazy 2s ease-in-out infinite;
+    border: 2px solid var(--neon-pink);
+    border-radius: 8px;
+    padding: 5px 10px;
+    display: inline-block;
+    margin-bottom: 10px;  /* Espacement en bas pour séparer de .aff_tour */
+}
+
+.player-info .aff_tour {
+    font-size: 1.2em;
+    color: var(--neon-pink);  
+    text-shadow: 0 0 5px var(--neon-pink), 0 0 15px var(--neon-pink);
+    animation: glowShift 4s ease-in-out infinite;
+    border: 2px solid var(--neon-pink);
+    border-radius: 8px;
+    padding: 5px 10px;
+    display: inline-block;
+}
+
+
+
+

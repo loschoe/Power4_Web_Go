@@ -2,24 +2,24 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personnalisation</title>
-    <link rel="stylesheet" href="static/init_game.css">
+    <link rel="stylesheet" href="/static/init_game.css">
 </head>
 <body>
     <div class="container">
         <h1 class="big-title">⚙️ Paramètres de jeu ⚙️</h1>
-         <form action="/start" method="POST">
-            <input type="text" placeholder="Pseudo Joueur 1" name="j1" class="input" required value="{{.Joueur1}}">
-            <input type="text" placeholder="Pseudo Joueur 2" name="j2" class="input input2" required value="{{.Joueur2}}">
-            
-            <h3>Choisissez votre difficulté</h3>
-            [Pas encore codé]
+
+        <form action="/start" method="POST">
+            <input type="text" name="j1" placeholder="Pseudo Joueur 1" required class="input">
+            <input type="text" name="j2" placeholder="Pseudo Joueur 2" required class="input input2">
+
+            <div class="difficulty-buttons">
+                <button type="submit" name="difficulty" value="easy" class="btn">Easy (6x7)</button>
+                <button type="submit" name="difficulty" value="medium" class="btn">Medium (6x7 with 3 blocs)</button>
+                <button type="submit" name="difficulty" value="hard" class="btn">Hard (6x9 with 5 blocs)</button>
+                <button type="submit" name="difficulty" value="extrem" class="btn">Extrem (7x8 with 7 blocs)</button>
+            </div>
         </form>
-        <form action="/play" method="GET">
-            <button type="submit" class="btn">▶️ Commencer la partie</button>
-        </form>
-        </div>
     </div>
 </body>
 </html>

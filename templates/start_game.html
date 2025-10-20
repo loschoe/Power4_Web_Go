@@ -3,36 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>Puissance 4</title>
-    <link rel="stylesheet" href="../static/game_styles.css" class="css">
-    <link rel="stylesheet" href="https://cartr.gitlab.io/undertale-fonts/determination-mono.css">
+    <link rel="stylesheet" href="/static/game_styles.css">
 </head>
-
 <body>
-    <header>
-        <h1>Puissance 4</h1>
-    </header>
-    
-
-    <form method="POST" action="/play">
-        <!-- Boutons pour chaque colonne -->
-        <div class="btn-container">
-            {{range $j := .Cols}}
-            <button class= "btnj" type="submit" name="col" value="{{$j}}">↓</button>
-            {{end}}
+    <div class="container">
+        <div class="player-info">
+            <p class="aff_joueurs">{{if .J1}}{{.J1}}{{else}}Joueur 1{{end}} 🔴 vs {{if .J2}}{{.J2}}{{else}}Joueur 2{{end}} 🟡</p>
+            <p class="aff_tour">
+                C'est au tour de : 
+                {{if eq .CurrentPlayer 1}}{{if .J1}}{{.J1}}{{else}}Joueur 1{{end}}
+                {{else}}{{if .J2}}{{.J2}}{{else}}Joueur 2{{end}}
+                {{end}}
+            </p>
         </div>
 
-        <!-- Grille du jeu -->
-        <table class="board">
-            {{range $i, $row := .Grid}}
-            <tr>
-                {{range $j, $cell := $row}}
-                <td class="cell {{if eq $cell 1}}player1{{else if eq $cell 2}}player2{{end}}">
-                    <div class="hole"></div>
-                </td>
+        <form method="POST" action="/play">
+            <input type="hidden" name="j1" value="{{.J1}}">
+            <input type="hidden" name="j2" value="{{.J2}}">
+
+            <div class="btn-container">
+                {{range .Cols}}
+                <button class="btnj" type="submit" name="col" value="{{.}}">↓</button>
                 {{end}}
-            </tr>
-            {{end}}
-        </table>
-    </form>
+            </div>
+
+            <table class="board">
+                {{range $i, $row := .Grid}}
+                <tr>
+                    {{range $j, $cell := $row}}
+                    <td class="cell
+                        {{if eq $cell 1}}player1
+                        {{else if eq $cell 2}}player2
+                        {{else if eq $cell 3}}block
+                        {{end}}">
+                        {{if ne $cell 3}}
+                        <div class="hole"></div>
+                        {{end}}
+                    </td>
+                    {{end}}
+                </tr>
+                {{end}}
+            </table>
+        </form>
+    </div>
 </body>
 </html>

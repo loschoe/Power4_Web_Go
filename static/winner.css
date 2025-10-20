@@ -1,0 +1,104 @@
+/* === PAGE DE VICTOIRE - STYLE NÉON FIXE === */
+:root {
+  --bg-deep: #080b12;
+  --neon-cyan: #00eaff;
+  --neon-pink: #cd3da4;
+  --text: #e7fbff;
+
+  --grid: 60px;
+  --horizon: 58vh;
+}
+
+/* ---- Structure globale ---- */
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-deep);
+  color: var(--text);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  text-align: center;
+  overflow: hidden;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: -20vmax;
+  background: 
+    radial-gradient(1200px 800px at 10% -10%, rgba(0,234,255,.25), transparent 50%),
+    radial-gradient(1100px 800px at 120% 0%, rgba(255,0,225,.2), transparent 55%),
+    radial-gradient(1200px 600px at 50% 120%, rgba(0,0,0,.6), transparent 60%);
+  z-index: -2;
+  filter: saturate(110%);
+  pointer-events: none;
+}
+
+/* ---- Titre de victoire ---- */
+h1 {
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(2rem, 5vw + 1rem, 5rem);
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter:
+    drop-shadow(0 0 6px var(--neon-cyan))
+    drop-shadow(0 0 12px var(--neon-pink))
+    drop-shadow(0 0 20px var(--neon-pink))
+    drop-shadow(0 0 30px rgba(205,61,164,0.5));
+  margin-bottom: 2rem;
+}
+
+/* ---- Bouton Rejouer ---- */
+a {
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 600;
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff4b2b, #ff416c);
+  font-size: 1.1rem;
+  letter-spacing: 0.6px;
+  transition: transform 0.25s ease, background 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+a:hover {
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  transform: scale(1.05);
+}
+
+/* ---- Grille 3D futuriste ---- */
+.grid-floor {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--horizon);
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to right,
+      var(--neon-cyan) 0 1px,
+      transparent 1px var(--grid)
+    ),
+    repeating-linear-gradient(
+      to top,
+      var(--neon-pink) 0 1px,
+      transparent 1px var(--grid)
+    );
+  transform-origin: top center;
+  transform: perspective(900px) rotateX(64deg);
+  mix-blend-mode: screen;
+  opacity: 0.8;
+  filter:
+    drop-shadow(0 0 10px var(--neon-cyan))
+    drop-shadow(0 0 16px var(--neon-pink));
+}

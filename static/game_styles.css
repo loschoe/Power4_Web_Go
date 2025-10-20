@@ -30,6 +30,11 @@
     background-color: yellow;
 }
 
+.cell.block {
+    background-color: #004080;
+    cursor: not-allowed;
+}
+
 td {
     width: 63px;
     height: 63px;

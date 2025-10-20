@@ -31,8 +31,14 @@
                 {{range $i, $row := .Grid}}
                 <tr>
                     {{range $j, $cell := $row}}
-                    <td class="cell {{if eq $cell 1}}player1{{else if eq $cell 2}}player2{{end}}">
+                    <td class="cell
+                        {{if eq $cell 1}}player1
+                        {{else if eq $cell 2}}player2
+                        {{else if eq $cell 3}}block
+                        {{end}}">
+                        {{if ne $cell 3}}
                         <div class="hole"></div>
+                        {{end}}
                     </td>
                     {{end}}
                 </tr>

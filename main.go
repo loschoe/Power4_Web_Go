@@ -10,10 +10,17 @@ import (
 	"time"
 )
 
-var columns map[int][]int
-var rows, cols int
-var currentPlayer = 1
+// =================== Variables globales ===================
+var (
+	columns          map[int][]int
+	rows, cols       int
+	currentPlayer    = 1
+	j1Global         string
+	j2Global         string
+	difficultyGlobal string
+)
 
+// =================== Structures ===================
 type GameData struct {
 	Grid          [][]int
 	Cols          []int
@@ -22,6 +29,7 @@ type GameData struct {
 	CurrentPlayer int
 }
 
+// =================== Initialisation ===================
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -50,6 +58,7 @@ func placeBlocks(num int) {
 	}
 }
 
+// =================== Logique du jeu ===================
 func detectWinner(grid [][]int) int {
 	for row := 0; row < rows; row++ {
 		for col := 0; col < cols; col++ {
@@ -101,16 +110,8 @@ func handleInit(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
-func handleStart(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/init", http.StatusSeeOther)
-		return
-	}
-
-	j1 := r.FormValue("j1")
-	j2 := r.FormValue("j2")
-	difficulty := r.FormValue("difficulty")
-
+func setupGame(j1, j2, difficulty string) GameData {
+	// Configuration selon la difficulté
 	switch difficulty {
 	case "easy", "medium":
 		rows, cols = 6, 7
@@ -155,6 +156,26 @@ func handleStart(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	return data
+}
+
+func handleStart(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/init", http.StatusSeeOther)
+		return
+	}
+
+	j1 := r.FormValue("j1")
+	j2 := r.FormValue("j2")
+	difficulty := r.FormValue("difficulty")
+
+	// Sauvegarde globale
+	j1Global = j1
+	j2Global = j2
+	difficultyGlobal = difficulty
+
+	data := setupGame(j1, j2, difficulty)
+
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "start_game.html")))
 	tmpl.Execute(w, data)
 }
@@ -167,9 +188,6 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 	colStr := r.FormValue("col")
-	j1 := r.FormValue("j1")
-	j2 := r.FormValue("j2")
-
 	c, err := strconv.Atoi(colStr)
 	if err == nil && c >= 0 && c < cols {
 		for r := 0; r < rows; r++ {
@@ -193,18 +211,18 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 
 	winner := detectWinner(grid)
 	if winner == 1 {
-		http.Redirect(w, r, "/winner?name="+j1, http.StatusSeeOther)
+		http.Redirect(w, r, "/winner?name="+j1Global, http.StatusSeeOther)
 		return
 	} else if winner == 2 {
-		http.Redirect(w, r, "/winner?name="+j2, http.StatusSeeOther)
+		http.Redirect(w, r, "/winner?name="+j2Global, http.StatusSeeOther)
 		return
 	}
 
 	data := GameData{
 		Grid:          grid,
 		Cols:          make([]int, cols),
-		J1:            j1,
-		J2:            j2,
+		J1:            j1Global,
+		J2:            j2Global,
 		CurrentPlayer: currentPlayer,
 	}
 	for i := 0; i < cols; i++ {
@@ -216,10 +234,26 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleWinner(w http.ResponseWriter, r *http.Request) {
-	resetGame()
 	winner := r.URL.Query().Get("name")
+
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "winner.html")))
-	tmpl.Execute(w, struct{ Winner string }{Winner: winner})
+	tmpl.Execute(w, struct {
+		Winner string
+		J1     string
+		J2     string
+	}{
+		Winner: winner,
+		J1:     j1Global,
+		J2:     j2Global,
+	})
+}
+
+// ✅ La revanche relance directement la partie avec les mêmes infos
+func handleRevanche(w http.ResponseWriter, r *http.Request) {
+	data := setupGame(j1Global, j2Global, difficultyGlobal)
+
+	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "start_game.html")))
+	tmpl.Execute(w, data)
 }
 
 // =================== Main ===================
@@ -229,11 +263,12 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	// Routes principales
-	http.HandleFunc("/", handleHome)        // Page d'accueil
-	http.HandleFunc("/init", handleInit)    // Formulaire de saisie des noms
-	http.HandleFunc("/start", handleStart)  // Lancement du jeu
-	http.HandleFunc("/play", handlePlay)    // Jouer un coup
-	http.HandleFunc("/winner", handleWinner)// Page gagnant
+	http.HandleFunc("/", handleHome)
+	http.HandleFunc("/init", handleInit)
+	http.HandleFunc("/start", handleStart)
+	http.HandleFunc("/play", handlePlay)
+	http.HandleFunc("/winner", handleWinner)
+	http.HandleFunc("/revanche", handleRevanche)
 
 	log.Println("✅ Serveur démarré sur http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))

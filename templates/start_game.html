@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Puissance 4</title>
+    <title>Puissance 4 | Jeu en cours</title>
     <link rel="stylesheet" href="/static/game_styles.css">
 </head>
 <body>
@@ -16,6 +16,12 @@
                 {{end}}
             </p>
         </div>
+        
+        {{if .Message}}
+        <div class="gravity-message">
+            {{.Message}}
+        </div>
+        {{end}}
 
         <form method="POST" action="/play">
             <input type="hidden" name="j1" value="{{.J1}}">

@@ -2,11 +2,17 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Victoire</title>
+  <title>Puissance 4 | Victoire</title>
   <link rel="stylesheet" href="/static/winner.css">
 </head>
 <body>
-  <h1>🏆 Bravo {{.Winner}} ! 🏆</h1>
+  <h1>
+  {{if eq .Winner "Aucun gagnant"}}
+  Match nul !
+  {{else}}
+  🏆 Le gagnant est {{.Winner}} ! 🏆
+  {{end}}
+  </h1>
   <a href="/revanche" class="start-btn">Rematch</a>
   <a href="/" class="start-btn">Exit</a>
   <div class="grid-floor"></div>

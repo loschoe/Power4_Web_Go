@@ -14,10 +14,13 @@ import (
 var (
 	columns          map[int][]int
 	rows, cols       int
+	moveCount 		 int
 	currentPlayer    = 1
 	j1Global         string
 	j2Global         string
 	difficultyGlobal string
+	gravityDown		     bool = true
+	gravityEnabled    bool = true 
 )
 
 // =================== Structures ===================
@@ -27,6 +30,7 @@ type GameData struct {
 	J1            string
 	J2            string
 	CurrentPlayer int
+	Message 	  string
 }
 
 // =================== Initialisation ===================
@@ -34,6 +38,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+// Initialiser les colonnes du jeu 
 func initColumns() {
 	columns = make(map[int][]int)
 	for c := 0; c < cols; c++ {
@@ -42,23 +47,39 @@ func initColumns() {
 	currentPlayer = 1
 }
 
+// Reset le jeu après une partie 
 func resetGame() {
 	initColumns()
+	moveCount = 0
+	gravityDown = true
 }
 
+// Placer un bloc plein
 func placeBlocks(num int) {
 	placed := 0
 	for placed < num {
 		row := rand.Intn(rows)
 		col := rand.Intn(cols)
 		if columns[col][row] == 0 {
-			columns[col][row] = 3 // 3 = bloc
+			columns[col][row] = 3 								 
 			placed++
 		}
 	}
 }
 
+// Gravité 
+func Gravity() {
+	if !gravityEnabled {					// Ne pas toucher à la gravité du mode easy 
+		return 
+	}
+	moveCount++								// Initialisation des 6 coups pour les autres difficultés 
+	if moveCount%6 == 0 {
+		gravityDown = !gravityDown
+	}
+}
+
 // =================== Logique du jeu ===================
+// Détection d'un gagnant 
 func detectWinner(grid [][]int) int {
 	for row := 0; row < rows; row++ {
 		for col := 0; col < cols; col++ {
@@ -99,7 +120,19 @@ func detectWinner(grid [][]int) int {
 	return 0
 }
 
-// =================== Handlers ===================
+// Détection d'une égalité (grille pleine sans gagnant)
+func isDraw(grid [][]int) bool {
+	for r := 0; r < rows; r++ {
+		for c := 0; c < cols; c++ {
+			if grid[r][c] == 0 {
+				return false // encore une case vide → pas égalité
+			}
+		}
+	}
+	return true
+}
+
+// =================== Handlers (Afficher les différentes pages)===================
 func handleHome(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "game.html")))
 	tmpl.Execute(w, nil)
@@ -110,8 +143,8 @@ func handleInit(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
+// Config de la difficulté 
 func setupGame(j1, j2, difficulty string) GameData {
-	// Configuration selon la difficulté
 	switch difficulty {
 	case "easy", "medium":
 		rows, cols = 6, 7
@@ -125,6 +158,14 @@ func setupGame(j1, j2, difficulty string) GameData {
 
 	resetGame()
 
+	// Gravité désactivée en mode facile
+	if difficulty == "easy" {
+		gravityEnabled = false
+	} else {
+		gravityEnabled = true
+	}
+
+	// Le nombre de blocs pleins à placer 
 	switch difficulty {
 	case "medium":
 		placeBlocks(3)
@@ -169,7 +210,7 @@ func handleStart(w http.ResponseWriter, r *http.Request) {
 	j2 := r.FormValue("j2")
 	difficulty := r.FormValue("difficulty")
 
-	// Sauvegarde globale
+	// Sauvegarde
 	j1Global = j1
 	j2Global = j2
 	difficultyGlobal = difficulty
@@ -190,15 +231,29 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 	colStr := r.FormValue("col")
 	c, err := strconv.Atoi(colStr)
 	if err == nil && c >= 0 && c < cols {
-		for r := 0; r < rows; r++ {
-			if columns[c][r] == 0 {
-				columns[c][r] = currentPlayer
-				currentPlayer = 3 - currentPlayer
-				break
+		if gravityDown {
+			// Gravité normale : les jetons tombent vers le bas
+			for r := 0; r < rows; r++ {
+				if columns[c][r] == 0 {
+					columns[c][r] = currentPlayer
+					currentPlayer = 3 - currentPlayer
+					break
+				}
+			}
+		} else {
+			// Gravité inversée : les jetons "montent" vers le haut
+			for r := rows - 1; r >= 0; r-- {
+				if columns[c][r] == 0 {
+					columns[c][r] = currentPlayer
+					currentPlayer = 3 - currentPlayer
+					break
+				}
 			}
 		}
+		Gravity()
 	}
 
+	// Mise à jour de la grille
 	grid := make([][]int, rows)
 	for r := 0; r < rows; r++ {
 		grid[r] = make([]int, cols)
@@ -209,13 +264,30 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Détermination du gagnant ou égalité
 	winner := detectWinner(grid)
+	winnerName := ""
 	if winner == 1 {
-		http.Redirect(w, r, "/winner?name="+j1Global, http.StatusSeeOther)
-		return
+		winnerName = j1Global
 	} else if winner == 2 {
-		http.Redirect(w, r, "/winner?name="+j2Global, http.StatusSeeOther)
+		winnerName = j2Global
+	} else if isDraw(grid) {
+		winnerName = "Aucun gagnant"
+	}
+
+	if winnerName != "" {
+		http.Redirect(w, r, "/winner?name="+winnerName, http.StatusSeeOther)
 		return
+	}
+
+	// les messages d'alerte du changement de gravité 
+	msg := ""
+	if gravityEnabled && moveCount%6 == 0 {
+		if gravityDown {
+			msg = "💡 Gravité réactivée — les jetons retombent !"
+		} else {
+			msg = "⚠️ Gravité désactivée — les jetons restent en haut !"
+		}
 	}
 
 	data := GameData{
@@ -224,6 +296,7 @@ func handlePlay(w http.ResponseWriter, r *http.Request) {
 		J1:            j1Global,
 		J2:            j2Global,
 		CurrentPlayer: currentPlayer,
+		Message:       msg,
 	}
 	for i := 0; i < cols; i++ {
 		data.Cols[i] = i
@@ -248,7 +321,7 @@ func handleWinner(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// ✅ La revanche relance directement la partie avec les mêmes infos
+// La revanche
 func handleRevanche(w http.ResponseWriter, r *http.Request) {
 	data := setupGame(j1Global, j2Global, difficultyGlobal)
 

@@ -21,8 +21,3 @@ Ce jeu est développé dans le cadre d'un module à **STRASBOURG Ynov Campus**.
 - Backend : Golang
 - Frontend : HTML / CSS
 - Serveur HTTP : net/http de Go
-
-**Ynov Campus - Strasbourg 2025**
-
-Auteur :
-- Ton nom

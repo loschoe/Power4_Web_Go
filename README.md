@@ -12,8 +12,23 @@ Ce jeu est développé dans le cadre d'un module à **STRASBOURG Ynov Campus**.
 - Interface simple pour jouer directement depuis le navigateur
 
 ## 🛠️ Installation et exécution :
-1. Cloner le projet
-2. Lancer le serveur avec la commande : go run main.go
+### 1. Cloner le dépôt
+```bash
+git clone https://github.com/Esqaaa/Power4.git
+cd puissance4-web
+```
+### 2. Installer les dépendances Go
+```bash
+go mod tidy
+```
+### 3. Lancer le serveur
+```bash
+go run main.go
+```
+### 4. Jouer
+Ouvrez votre navigateur et allez sur `http://localhost:8080`.
+---
+3. Lancer le serveur avec la commande : go run main.go
 4. Ouvrir un navigateur et accéder à : http://localhost:8080
 5. Cliquer sur les boutons pour naviguer dans le jeu
 
